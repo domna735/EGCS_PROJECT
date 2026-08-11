@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.migration.mapper.MigrationResourceMappingMapper">
+
+    <resultMap type="MigrationResourceMappingEntity" id="MigrationResourceMappingResult">
+        <id property="mappingId" column="mapping_id" />
+        <result property="sourceEnvKey" column="source_env_key" />
+        <result property="targetEnvKey" column="target_env_key" />
+        <result property="resourceType" column="resource_type" />
+        <result property="resourceName" column="resource_name" />
+        <result property="sourceGuid" column="source_guid" />
+        <result property="targetGuid" column="target_guid" />
+        <result property="syncStatus" column="sync_status" />
+        <result property="lastSyncTime" column="last_sync_time" />
+        <result property="remark" column="remark" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="selectMappingVo">
+        select mapping_id, source_env_key, target_env_key, resource_type, resource_name,
+               source_guid, target_guid, sync_status, last_sync_time, remark,
+               create_by, create_time, update_by, update_time
+        from migration_resource_mapping
+    </sql>
+
+    <select id="selectById" parameterType="Long" resultMap="MigrationResourceMappingResult">
+        <include refid="selectMappingVo" />
+        where mapping_id = #{mappingId}
+    </select>
+
+    <select id="selectByPairAndName" parameterType="MigrationResourceMappingEntity" resultMap="MigrationResourceMappingResult">
+        <include refid="selectMappingVo" />
+        where source_env_key = #{sourceEnvKey}
+          and target_env_key = #{targetEnvKey}
+          and resource_type = #{resourceType}
+          and resource_name = #{resourceName}
+        limit 1
+    </select>
+
+    <select id="selectList" parameterType="MigrationResourceMappingEntity" resultMap="MigrationResourceMappingResult">
+        <include refid="selectMappingVo" />
+        <where>
+            <if test="sourceEnvKey != null and sourceEnvKey != ''">
+                and source_env_key = #{sourceEnvKey}
+            </if>
+            <if test="targetEnvKey != null and targetEnvKey != ''">
+                and target_env_key = #{targetEnvKey}
+            </if>
+            <if test="resourceType != null and resourceType != ''">
+                and resource_type = #{resourceType}
+            </if>
+            <if test="resourceName != null and resourceName != ''">
+                and resource_name like concat('%', #{resourceName}, '%')
+            </if>
+            <if test="syncStatus != null and syncStatus != ''">
+                and sync_status = #{syncStatus}
+            </if>
+        </where>
+        order by mapping_id asc
+    </select>
+
+    <insert id="insert" parameterType="MigrationResourceMappingEntity" useGeneratedKeys="true" keyProperty="mappingId">
+        insert into migration_resource_mapping (
+            source_env_key, target_env_key, resource_type, resource_name,
+            source_guid, target_guid, sync_status, last_sync_time,
+            remark, create_by, create_time
+        ) values (
+            #{sourceEnvKey}, #{targetEnvKey}, #{resourceType}, #{resourceName},
+            #{sourceGuid}, #{targetGuid}, #{syncStatus}, sysdate(),
+            #{remark}, #{createBy}, sysdate()
+        )
+    </insert>
+
+    <update id="update" parameterType="MigrationResourceMappingEntity">
+        update migration_resource_mapping
+        <set>
+            <if test="sourceEnvKey != null and sourceEnvKey != ''">source_env_key = #{sourceEnvKey},</if>
+            <if test="targetEnvKey != null and targetEnvKey != ''">target_env_key = #{targetEnvKey},</if>
+            <if test="resourceType != null and resourceType != ''">resource_type = #{resourceType},</if>
+            <if test="resourceName != null and resourceName != ''">resource_name = #{resourceName},</if>
+            <if test="sourceGuid != null and sourceGuid != ''">source_guid = #{sourceGuid},</if>
+            <if test="targetGuid != null and targetGuid != ''">target_guid = #{targetGuid},</if>
+            <if test="syncStatus != null and syncStatus != ''">sync_status = #{syncStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            last_sync_time = sysdate(),
+            update_time = sysdate()
+        </set>
+        where mapping_id = #{mappingId}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        delete from migration_resource_mapping where mapping_id = #{mappingId}
+    </delete>
+</mapper>

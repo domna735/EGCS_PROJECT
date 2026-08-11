@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.migration.env.MigrationEnvironmentProfile;
+import com.ruoyi.migration.domain.MigrationResourceMappingEntity;
 import com.ruoyi.migration.env.MigrationEnvironmentRegistryService;
 import com.ruoyi.migration.model.JobDescriptor;
 import com.ruoyi.migration.model.ResourceDescriptor;
 import com.ruoyi.migration.service.MigrationService;
+import com.ruoyi.migration.service.MigrationResourceMappingService;
 
 @RestController
 @RequestMapping("/api/v1/migration")
@@ -23,10 +25,12 @@ public class MigrationController {
 
     private final MigrationService migrationService;
     private final MigrationEnvironmentRegistryService environmentRegistryService;
+    private final MigrationResourceMappingService mappingService;
 
-    public MigrationController(MigrationService migrationService, MigrationEnvironmentRegistryService environmentRegistryService) {
+    public MigrationController(MigrationService migrationService, MigrationEnvironmentRegistryService environmentRegistryService, MigrationResourceMappingService mappingService) {
         this.migrationService = migrationService;
         this.environmentRegistryService = environmentRegistryService;
+        this.mappingService = mappingService;
     }
 
     /**
@@ -138,6 +142,33 @@ public class MigrationController {
             return AjaxResult.success("PROFILE_SAVED", environmentRegistryService.saveProfile(profile));
         } catch (Exception e) {
             return AjaxResult.error("儲存環境設定失敗：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/resource-mappings")
+    public AjaxResult listResourceMappings(MigrationResourceMappingEntity query) {
+        try {
+            return AjaxResult.success(mappingService.list(query));
+        } catch (Exception e) {
+            return AjaxResult.error("查詢資源映射失敗：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/resource-mappings")
+    public AjaxResult saveResourceMapping(@RequestBody MigrationResourceMappingEntity mapping) {
+        try {
+            return AjaxResult.success("MAPPING_SAVED", mappingService.save(mapping));
+        } catch (Exception e) {
+            return AjaxResult.error("儲存資源映射失敗：" + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/resource-mappings/{mappingId}")
+    public AjaxResult deleteResourceMapping(@PathVariable Long mappingId) {
+        try {
+            return AjaxResult.success("MAPPING_DELETED", mappingService.delete(mappingId));
+        } catch (Exception e) {
+            return AjaxResult.error("刪除資源映射失敗：" + e.getMessage());
         }
     }
 

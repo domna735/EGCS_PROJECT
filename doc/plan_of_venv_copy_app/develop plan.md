@@ -72,8 +72,23 @@
 - `migration_job_progress`：處理中 / 待處理 / 成功 / 失敗的進度資料。
 - `migration_audit_log`：完整操作軌跡、錯誤與回滾紀錄。
 - `migration_tier_catalog`：資源類型與 Tier 順序定義，作為 wizard 與排程順序的依據。
+- `migration_resource_mapping`：跨 Org 資源映射表，處理 name / GUID 對應、衝突與同步狀態。
+- `migration_snapshot`：執行前快照，支援 backup / snapshot / restore / merge。
+- `migration_version_record`：Git 與資料版本追溯記錄，支援回滾與變更審計。
 
 `client_secret` 不可明文儲存，應使用 RuoYi 既有加密機制或獨立金鑰管理層處理。
+
+## 1.6 架構補充：多 Org、備份與版本控制
+
+依照需求與 `risk_matrix.md` 的風險分類，EGCS 後續的核心架構應再補強以下五個面向：
+
+1. **多 Org 遷移與同步**：以 `migration_env_profile` 定義每個 Org 的 region 與憑證，再透過 `migration_resource_mapping` 對應 source / target GUID，避免 name duplicate、ID duplicate 與跨 Org drift。
+2. **Mapping Table 衝突處理**：當目標 Org 已有同名資源時，先建立 import mapping；若需要 rename，則由 UI 讓使用者決定 alias name，並在寫入 workspace 前完成替換。
+3. **Backup / Snapshot / Restore / Merge**：在 Plan 前自動建立 JSON snapshot；若 apply 失敗，可由 snapshot 還原；若只需要局部同步，則以 merge 模式產出差異資源與 import block。
+4. **Version Control / Rollback**：每次 apply 前後都建立版本記錄，保存 selectedResources、main.tf、snapshot 與 audit metadata，回滾時只恢復對應版本，不直接 destroy。
+5. **Voice Files 本地儲存**：音檔不直接走高延遲雲端上傳流程，而是先進入本地 cache，再由後端按 hash 差異決定是否同步到 Genesys Cloud。
+
+這一層補強的目標是把 EGCS 從「單次遷移工具」升級成「可重複、可比較、可回復」的多 Org 維運平台。
 
 ---
 
@@ -200,6 +215,7 @@
 - Tier-Based 目錄  
 - Workspace 清理策略（成功刪除 / 失敗保留 / 回滾重建）  
 - Declarative Import Block（同名衝突防禦）  
+- Snapshot / Restore / Merge 基礎資料結構  
 
 ---
 
@@ -246,6 +262,7 @@
 - Rollback  
 - 審計頁面  
 - **Audit Log 明細與查詢**  
+- **Version Record 與 Snapshot Trace**  
 
 ---
 
@@ -276,6 +293,7 @@
 - [ ] Credential Module  
 - [ ] Vault 整合  
 - [ ] Discovery Engine  
+- [ ] Resource Mapping Table / Conflict Resolver  
 - [ ] Compare & Dependency Gate  
 - [ ] DAG Analyzer  
 - [ ] Diff Engine  
@@ -288,6 +306,7 @@
 - [ ] Data Source Downgrade Engine  
 - [ ] De-hardcode Engine  
 - [ ] Terraform Executor  
+- [ ] Snapshot / Restore / Merge Engine  
 - [ ] **Terraform Apply State Machine（v5.1）**  
 - [ ] **Progress Monitor Engine（v5.1）**  
 - [ ] **WebSocket Re-attach（v5.1）**  
@@ -296,6 +315,7 @@
 - [ ] Git Audit Engine  
 - [ ] Audit Log Engine  
 - [ ] Rollback Engine  
+- [ ] Version Record Engine  
 
 ---
 
