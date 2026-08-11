@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.migration.mapper.MigrationEnvironmentProfileMapper">
+
+    <resultMap type="MigrationEnvironmentProfileEntity" id="MigrationEnvironmentProfileResult">
+        <id property="profileId" column="profile_id" />
+        <result property="envKey" column="env_key" />
+        <result property="displayName" column="display_name" />
+        <result property="region" column="region" />
+        <result property="clientId" column="client_id" />
+        <result property="clientSecretEnc" column="client_secret_enc" />
+        <result property="enabled" column="enabled" />
+        <result property="remark" column="remark" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="selectProfileVo">
+        select profile_id, env_key, display_name, region, client_id, client_secret_enc, enabled,
+               remark, create_by, create_time, update_by, update_time
+        from migration_env_profile
+    </sql>
+
+    <select id="selectById" parameterType="Long" resultMap="MigrationEnvironmentProfileResult">
+        <include refid="selectProfileVo" />
+        where profile_id = #{profileId}
+    </select>
+
+    <select id="selectByEnvKey" parameterType="String" resultMap="MigrationEnvironmentProfileResult">
+        <include refid="selectProfileVo" />
+        where env_key = #{envKey} limit 1
+    </select>
+
+    <select id="selectList" parameterType="MigrationEnvironmentProfileEntity" resultMap="MigrationEnvironmentProfileResult">
+        <include refid="selectProfileVo" />
+        <where>
+            <if test="envKey != null and envKey != ''">
+                and env_key like concat('%', #{envKey}, '%')
+            </if>
+            <if test="displayName != null and displayName != ''">
+                and display_name like concat('%', #{displayName}, '%')
+            </if>
+            <if test="region != null and region != ''">
+                and region = #{region}
+            </if>
+            <if test="enabled != null and enabled != ''">
+                and enabled = #{enabled}
+            </if>
+        </where>
+        order by profile_id asc
+    </select>
+
+    <insert id="insert" parameterType="MigrationEnvironmentProfileEntity" useGeneratedKeys="true" keyProperty="profileId">
+        insert into migration_env_profile (
+            env_key, display_name, region, client_id, client_secret_enc, enabled, remark, create_by, create_time
+        ) values (
+            #{envKey}, #{displayName}, #{region}, #{clientId}, #{clientSecretEnc}, #{enabled}, #{remark}, #{createBy}, sysdate()
+        )
+    </insert>
+
+    <update id="update" parameterType="MigrationEnvironmentProfileEntity">
+        update migration_env_profile
+        <set>
+            <if test="envKey != null and envKey != ''">env_key = #{envKey},</if>
+            <if test="displayName != null and displayName != ''">display_name = #{displayName},</if>
+            <if test="region != null and region != ''">region = #{region},</if>
+            <if test="clientId != null and clientId != ''">client_id = #{clientId},</if>
+            <if test="clientSecretEnc != null and clientSecretEnc != ''">client_secret_enc = #{clientSecretEnc},</if>
+            <if test="enabled != null and enabled != ''">enabled = #{enabled},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where profile_id = #{profileId}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        delete from migration_env_profile where profile_id = #{profileId}
+    </delete>
+</mapper>
