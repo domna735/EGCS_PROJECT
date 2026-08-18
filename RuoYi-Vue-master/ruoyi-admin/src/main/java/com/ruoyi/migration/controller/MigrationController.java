@@ -2,22 +2,22 @@ package com.ruoyi.migration.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.migration.env.MigrationEnvironmentProfile;
 import com.ruoyi.migration.domain.MigrationResourceMappingEntity;
+import com.ruoyi.migration.env.MigrationEnvironmentProfile;
 import com.ruoyi.migration.env.MigrationEnvironmentRegistryService;
 import com.ruoyi.migration.model.JobDescriptor;
 import com.ruoyi.migration.model.ResourceDescriptor;
-import com.ruoyi.migration.service.MigrationService;
 import com.ruoyi.migration.service.MigrationResourceMappingService;
+import com.ruoyi.migration.service.MigrationService;
 
 @RestController
 @RequestMapping("/api/v1/migration")
